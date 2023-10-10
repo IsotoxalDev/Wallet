@@ -1,3 +1,4 @@
+import getpass
 import pickle
 import sys
 
@@ -165,6 +166,9 @@ def menu():
     elif opt == 6: passwd_set()
     elif opt == 7: sys.exit(0)
     else: print("Invalid input")
+    
+    if opt != 1:
+        input("\nPress any key to continue ")
 
 def percentage_wealth():
     total = 0
@@ -195,7 +199,7 @@ def show_transactions(wallet_name = ""):
         while True:
             l = pickle.load(f)
             if wallet_name == "" or wallet_name == l[0]:
-                a = "Deposit:  " if l[2] else "Withdraw: "
+                a = "Deposit:  " if l[2] else  "Withdraw: "
                 print(f"{c}. {a}: {l[1]}")
             c+=1
     except EOFError:
@@ -264,12 +268,13 @@ Balance: {wallets[wallet_name]}₹
     elif opt == 3: show_transactions(wallet_name)
     elif opt == 4: delete_wallet(wallet_name)
     elif opt == 5: return True
+    input("\nPress any key to continue ")
     
 if __name__ == "__main__":
     if not passwd_check():
-        print("Wait a minute.... who are you?")
+        print("Access denied")
         sys.exit(1)
-    print("Welcome Mr Stark")
+    print(f"Welcome {getpass.getuser()}")
     load_wallets()
     while True:
         menu()
