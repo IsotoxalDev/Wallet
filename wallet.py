@@ -1,12 +1,7 @@
 import pickle
 import sys
 
-# Transaction details
-# Wallet_name
-# Action type (Withdraw or deposit)
-# Amount (In the least possible currency ie. paise for ruppee so only integers appear)
-
-CONFOPT = ["Y", "N"]
+PROMPT = "➜ "
 
 wallets = {}
 def passwd_set():
@@ -14,6 +9,7 @@ def passwd_set():
     new_passwd = input("Enter password: ")
     passwd_confirm = input("Enter password again to confirm:")
     if new_passwd != passwd_confirm:
+        print("The password doesn't match")
         return False
     file=open("passwd", "wb")
     pickle.dump(new_passwd,file)
@@ -42,7 +38,13 @@ def passwd_check():
     return passwd == actual_passwd
 
 def create_wallet():
-    wallet_name = input("\nCreating new wallet\nEnter wallet name: ")
+    print("\nCreating new wallet")
+    while True:
+        wallet_name = input("Enter wallet name: ")
+        if wallet_name in wallets:
+            print("Wallet already exists")
+            continue
+        break
     wallets[wallet_name] = 0
     save_wallet()
 
@@ -56,13 +58,13 @@ def load_wallets():
     except FileNotFoundError:
         print("No wallets found")
         create_wallet()
-        return
     except EOFError:
         if len(wallets) == 0:
             print("No wallets found")
             create_wallet()
         f.close()
 
+# Savin the elements of dictionary wallet
 def save_wallet():
     f = open("wallets.dat", "wb")
     for i in wallets:
@@ -110,7 +112,7 @@ def delete_wallet(wallet_name):
         return
     while True:
         conf = input(f"Are you sure you want to delete {wallet_name}? (Y/n): ").upper()
-        if conf in CONFOPT:
+        if conf in ["Y", "N"]:
             break
         print("Invalid option")
     if conf == "N":
@@ -123,6 +125,7 @@ def delete_wallet(wallet_name):
         break
     wallets[w] += wallets[wallet_name]
     del wallets[wallet_name]
+    print(f"\n{wallet_name} successfully deleted")
     save_wallet()
 
 def menu():
@@ -142,7 +145,12 @@ def menu():
 │                                   │
 └───────────────────────────────────┘
 """)
-    opt = int(input("➜ "))
+    while True:
+        try:    
+            opt = int(input(PROMPT))
+            break
+        except ValueError:
+            print("Invalid input")
     if opt == 1:
         w = wallet_select("Select wallet:")
         while True:
@@ -155,7 +163,8 @@ def menu():
     elif opt == 4: total_wealth()
     elif opt == 5: percentage_wealth()
     elif opt == 6: passwd_set()
-    elif opt == 7: return True
+    elif opt == 7: sys.exit(0)
+    else: print("Invalid input")
 
 def percentage_wealth():
     total = 0
@@ -170,13 +179,13 @@ def percentage_wealth():
         m = len(i) if  len(i) > m else m
         t.append(i)
     m+=6
-    print("\n┌──", "─"*(m), "──┐", sep="")
+    print("\n┌──", "─"*m, "──┐", sep="")
     print("│  Wealth Distribution:", " "*(m-20), "  │", sep="")
     for i in range(len(t)):
         percen = int((wallets[t[i]]/total)*100)
         x = len(str(percen))
         print(f"│  {i+1}. {t[i]}: {percen}%", " "*(m-(len(t[i])+6+x)), "  │", sep="")
-    print("└──", "─"*(m), "──┘", sep="")
+    print("└──", "─"*m, "──┘", sep="")
 
 def show_transactions(wallet_name = ""):
     try:
@@ -185,11 +194,8 @@ def show_transactions(wallet_name = ""):
         print()
         while True:
             l = pickle.load(f)
-            if wallet_name == "":
-                a = "Deposit:  " if l[2] else "Withdraw: "
-                print(f"{c}. {a}: {l[1]}")
-            elif wallet_name == l[0]:
-                a = "Deposit: " if l[2] else "Withdraw: "
+            if wallet_name == "" or wallet_name == l[0]:
+                a = "Deposit:  " if l[2] else  
                 print(f"{c}. {a}: {l[1]}")
             c+=1
     except EOFError:
@@ -218,7 +224,7 @@ def wallet_select(text, hide = ""):
     print("└──", "─"*(m), "──┘", sep="")
     while True:
         try:
-            opt = int(input("➜ "))
+            opt = int(input(PROMPT))
         except ValueError:
             print("Invalid input")
             continue
@@ -248,7 +254,7 @@ Balance: {wallets[wallet_name]}₹
 """)
     while True:
         try:
-            opt = int(input("➜ "))
+            opt = int(input(PROMPT))
         except ValueError:
             print("Invalid input")
             continue
@@ -266,4 +272,4 @@ if __name__ == "__main__":
     print("Welcome Mr Stark")
     load_wallets()
     while True:
-        if menu(): break
+        menu()
