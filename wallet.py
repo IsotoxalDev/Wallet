@@ -195,7 +195,7 @@ def show_transactions(wallet_name = ""):
         while True:
             l = pickle.load(f)
             if wallet_name == "" or wallet_name == l[0]:
-                a = "Deposit:  " if l[2] else  
+                a = "Deposit:  " if l[2] else "Withdraw: "
                 print(f"{c}. {a}: {l[1]}")
             c+=1
     except EOFError:
